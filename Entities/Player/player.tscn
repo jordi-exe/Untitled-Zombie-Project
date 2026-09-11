@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://ce1sdq1jdid2p"]
+
+[ext_resource type="Script" uid="uid://cijqrotb4pj53" path="res://Entities/Player/Scripts/CharacterController.gd" id="1_mv1ah"]
+[ext_resource type="Script" uid="uid://bux1cgxba1f8q" path="res://Entities/Player/Scripts/CameraController.gd" id="2_3uyv8"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3gg1t"]
+radius = 0.225
+height = 0.45
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mxn0q"]
+radius = 0.4
+height = 0.8
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_05pig"]
+radius = 0.4
+height = 0.9
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_mxn0q"]
+height = 1.8
+
+[node name="Player" type="CharacterBody3D" unique_id=984254434]
+script = ExtResource("1_mv1ah")
+
+[node name="Col_Prone" type="CollisionShape3D" parent="." unique_id=750021903]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.674484, 0)
+shape = SubResource("CapsuleShape3D_3gg1t")
+
+[node name="Col_Crouch" type="CollisionShape3D" parent="." unique_id=523063027]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.49948406, 0)
+shape = SubResource("CapsuleShape3D_mxn0q")
+
+[node name="Col_Stand" type="CollisionShape3D" parent="." unique_id=2079208031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CapsuleShape3D_05pig")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1255018515]
+mesh = SubResource("CapsuleMesh_mxn0q")
+
+[node name="Head" type="Node3D" parent="." unique_id=1416725050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("2_3uyv8")
+MIN_ANGLE_X = -60
+HEIGHT_SPEED = 4.0
+
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=1445886464]
