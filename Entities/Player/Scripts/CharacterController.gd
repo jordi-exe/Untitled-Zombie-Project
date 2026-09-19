@@ -23,13 +23,30 @@ var CURRENT_SPEED = 0.0
 @onready var col_crouch: CollisionShape3D = $Col_Crouch
 @onready var col_stand: CollisionShape3D = $Col_Stand
 
+# Player Animation
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var animation_tree: AnimationTree = $AnimationTree
+var state_machine : AnimationNodeStateMachinePlayback
+
 
 # Camera Variables
-@onready var head: Node3D = $Head
+@onready var head: Node3D = $Armature/GeneralSkeleton/BoneAttachment3D/Head
 
 func _ready() -> void:
+	state_machine = $AnimationTree.get("parameters/playback") as AnimationNodeStateMachinePlayback
+	#animation_player.play("Idle")
+	#PrepareAnims()
+	
 	CURRENT_SPEED = WALK_SPEED
 	col_prone.set_deferred("disabled", true)
+
+func PrepareAnims() -> void:
+	animation_player.set_blend_time("Idle", "Crouch_Enter", 0.5)
+	animation_player.set_blend_time("Crouch_Enter", "Crouch_Idle", 0.5)
+	animation_player.set_blend_time("Crouch_Idle", "Crawl_Enter", 0.5)
+	animation_player.set_blend_time("Crawl_Enter", "Crawl_Idle", 0.5)
+	animation_player.set_blend_time("Crawl_Idle", "Crawl_Exit", 0.5)
+	animation_player.set_blend_time("Crawl_Exit", "Idle", 0.5)
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -42,7 +59,7 @@ func _physics_process(delta: float) -> void:
 func HandleMovement() -> void:
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "up", "down")
-	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var direction = (transform.basis * -Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	if direction:
 		velocity.x = direction.x * CURRENT_SPEED
@@ -67,6 +84,8 @@ func ProcessState(delta: float) -> void:
 				SwitchState(STATE.JUMP)
 			elif Input.is_action_just_pressed("crouch"):
 				SwitchState(STATE.CROUCH)
+			elif Input.is_action_just_pressed("prone"):
+				SwitchState(STATE.PRONE)
 		STATE.SPRINT:
 			CURRENT_SPEED = RUN_SPEED
 			HandleMovement()
@@ -83,12 +102,12 @@ func ProcessState(delta: float) -> void:
 			HandleMovement()
 			
 			if Input.is_action_just_pressed("crouch"):
-				SwitchState(STATE.PRONE)
+				SwitchState(STATE.WALK)
 		STATE.PRONE:
 			CURRENT_SPEED = PRONE_SPEED
 			HandleMovement()
 			
-			if Input.is_action_just_pressed("crouch"):
+			if Input.is_action_just_pressed("prone"):
 				SwitchState(STATE.WALK)
 		
 		# Vertical states
@@ -119,14 +138,32 @@ func SwitchState(toState: STATE) -> void:
 			col_crouch.set_deferred("disabled", false)
 			col_stand.set_deferred("disabled", false)
 			col_prone.set_deferred("disabled", true)
+			
+			if previousState == STATE.PRONE:
+				animation_tree.set("parameters/Crawl/ExitCrawl/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+				animation_tree.set("parameters/conditions/isProning", false)
+				animation_tree.set("parameters/conditions/isStanding", true)
+			elif previousState == STATE.CROUCH:
+				animation_tree.set("parameters/Crouch/ExitCrouch/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+				animation_tree.set("parameters/conditions/isCrouching", false)
+				animation_tree.set("parameters/conditions/isStanding", true)
 		STATE.CROUCH:
 			head.Height_To_Crouching()
 			col_stand.set_deferred("disabled", true)
 			
+			animation_tree.set("parameters/conditions/isStanding", false)
+			animation_tree.set("parameters/conditions/isCrouching", true)
+			#animation_player.play("Crouch_Enter")
+			#animation_player.queue("Crouch_Idle")
 		STATE.PRONE:
 			head.Height_To_Proning()
 			col_crouch.set_deferred("disabled", true)
 			col_prone.set_deferred("disabled", false)
+			
+			animation_tree.set("parameters/conditions/isStanding", false)
+			animation_tree.set("parameters/conditions/isProning", true)
+			#animation_player.play("Crawl_Enter")
+			#animation_player.queue("Crawl_Idle")
 		
 		STATE.JUMP:
 			# Handle jump.

@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://b6x27wri6p44s"]
+
+[ext_resource type="PackedScene" uid="uid://m0txfcox5usp" path="res://Assets/DummyGun.blend" id="1_77ymd"]
+
+[node name="Pistol" type="Node3D" unique_id=467756442]
+
+[node name="DummyGun" parent="." unique_id=1395139343 instance=ExtResource("1_77ymd")]
+
+[node name="BulletOrigin" type="Node3D" parent="." unique_id=1671119589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02967301, 0.10541696)
+
+[node name="Grip" type="Node3D" parent="." unique_id=1809598198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.026353993, -0.07658797)
